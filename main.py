@@ -275,10 +275,11 @@ x, y = to_xy(df,'outcome')
 x_train, x_test, y_train, y_test = train_test_split(
     x, y, test_size=0.25, random_state=42)
 
+input_dim = x.shape[1]
 # Create neural net
 model = Sequential()
 
-model.add(Dense(10, input_dim=x.shape[1], kernel_initializer='normal', activation='relu'))
+model.add(Dense(10, input_dim=input_dim, kernel_initializer='normal', activation='relu'))
 model.add(Dense(50, kernel_initializer='normal', activation='relu'))
 model.add(Dense(10, kernel_initializer='normal', activation='relu'))
 model.add(Dense(23, kernel_initializer='normal', activation='softmax'))
@@ -303,7 +304,7 @@ print("Validation score: {}".format(score))
 
 # Inference on Test Case
 test_case = x_test[7]
-test_case = np.reshape(test_case,(-1,120))
+test_case = np.reshape(test_case,(-1,input_dim))
 
 pred = model.predict(test_case)
 pred = np.argmax(pred, axis=1)
