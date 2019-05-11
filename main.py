@@ -380,4 +380,4 @@ test_case = np.reshape(test_case,(-1,120))
 pred = model.predict(test_case)
 pred = np.argmax(pred, axis=1)
 
-print("Outcome Prediction : {}".format(pred))
+print("Outcome Prediction : {}".format(outcomes[pred]))
