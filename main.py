@@ -77,6 +77,7 @@ def to_xy(df, target):
     # Regression
     return df[result].values.astype(np.float32), df[[target]].values.astype(np.float32)
 
+
 # Nicely formatted time string
 def hms_string(sec_elapsed):
     h = int(sec_elapsed / (60 * 60))
@@ -110,7 +111,7 @@ def encode_numeric_range(df, name, normalized_low=-1, normalized_high=1,
         data_low = min(df[name])
         data_high = max(df[name])
 
-    df[name] = ((df[name] - data_low) / (data_high - data_low))         * (normalized_high - normalized_low) + normalized_low
+    df[name] = ((df[name] - data_low)/(data_high - data_low))*(normalized_high - normalized_low) + normalized_low
 
 
 # This function submits an assignment.  You can submit an assignment as much as you like, only the final
@@ -218,7 +219,7 @@ df[0:5]
 #
 # The following script can be used to give a high-level overview of how a dataset appears.
 
-# In[7]:
+# In[3]:
 
 
 ENCODING = 'utf-8'
@@ -249,7 +250,7 @@ def analyze(filename):
             expand_categories(df[col])
 
 
-# In[8]:
+# In[4]:
 
 
 # Analyze KDD-99
@@ -265,8 +266,7 @@ from scipy.stats import zscore
 # # Encode the feature vector
 # Encode every row in the database.  This is not instant!
 
-# In[9]:
-
+# In[5]:
 
 # Now encode the feature vector
 
@@ -347,12 +347,14 @@ x_train, x_test, y_train, y_test = train_test_split(
 
 # Create neural net
 model = Sequential()
+
 model.add(Dense(10, input_dim=x.shape[1], kernel_initializer='normal', activation='relu'))
-model.add(Dense(50, input_dim=x.shape[1], kernel_initializer='normal', activation='relu'))
-model.add(Dense(10, input_dim=x.shape[1], kernel_initializer='normal', activation='relu'))
-model.add(Dense(1, kernel_initializer='normal'))
-model.add(Dense(y.shape[1],activation='softmax'))
+model.add(Dense(50, kernel_initializer='normal', activation='relu'))
+model.add(Dense(10, kernel_initializer='normal', activation='relu'))
+model.add(Dense(23, kernel_initializer='normal', activation='softmax'))
+
 model.compile(loss='categorical_crossentropy', optimizer='adam')
+
 monitor = EarlyStopping(monitor='val_loss', min_delta=1e-3, patience=5, verbose=1, mode='auto')
 model.fit(x_train,y_train,validation_data=(x_test,y_test),callbacks=[monitor],verbose=2,epochs=1000)
 
@@ -370,3 +372,12 @@ print("Validation score: {}".format(score))
 
 
 # In[ ]:
+
+# Inference on Test Case
+test_case = x_test[7]
+test_case = np.reshape(test_case,(-1,120))
+
+pred = model.predict(test_case)
+pred = np.argmax(pred, axis=1)
+
+print("Outcome Prediction : {}".format(pred))
