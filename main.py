@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 
-import base64
 import os
-
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import requests
+import matplotlib.pyplot as plt
 from sklearn import preprocessing
-
 
 # Encode text values to dummy variables(i.e. [1,0,0],[0,1,0],[0,0,1] for red,green,blue)
 def encode_text_dummy(df, name):
@@ -17,7 +13,6 @@ def encode_text_dummy(df, name):
         dummy_name = f"{name}-{x}"
         df[dummy_name] = dummies[x]
     df.drop(name, axis=1, inplace=True)
-
 
 # Encode text values to a single dummy variable.  The new columns (which do not replace the old) will have a 1
 # at every location where the original column (name) matches each of the target_values.  One column is added for
@@ -29,13 +24,11 @@ def encode_text_single_dummy(df, name, target_values):
         name2 = f"{name}-{tv}"
         df[name2] = l
 
-
 # Encode text values to indexes(i.e. [1],[2],[3] for red,green,blue).
 def encode_text_index(df, name):
     le = preprocessing.LabelEncoder()
     df[name] = le.fit_transform(df[name])
     return le.classes_
-
 
 # Encode a numeric column as zscores
 def encode_numeric_zscore(df, name, mean=None, sd=None):
@@ -47,17 +40,14 @@ def encode_numeric_zscore(df, name, mean=None, sd=None):
 
     df[name] = (df[name] - mean) / sd
 
-
 # Convert all missing values in the specified column to the median
 def missing_median(df, name):
     med = df[name].median()
     df[name] = df[name].fillna(med)
 
-
 # Convert all missing values in the specified column to the default
 def missing_default(df, name, default_value):
     df[name] = df[name].fillna(default_value)
-
 
 # Convert a Pandas dataframe to the x,y inputs that TensorFlow needs
 def to_xy(df, target):
@@ -77,14 +67,12 @@ def to_xy(df, target):
     # Regression
     return df[result].values.astype(np.float32), df[[target]].values.astype(np.float32)
 
-
 # Nicely formatted time string
 def hms_string(sec_elapsed):
     h = int(sec_elapsed / (60 * 60))
     m = int((sec_elapsed % (60 * 60)) / 60)
     s = sec_elapsed % 60
     return f"{h}:{m:>02}:{s:>05.2f}"
-
 
 # Regression chart.
 def chart_regression(pred, y, sort=True):
@@ -103,7 +91,6 @@ def remove_outliers(df, name, sd):
                           >= (sd * df[name].std()))]
     df.drop(drop_rows, axis=0, inplace=True)
 
-
 # Encode a column to a range between normalized_low and normalized_high.
 def encode_numeric_range(df, name, normalized_low=-1, normalized_high=1,
                          data_low=None, data_high=None):
@@ -113,39 +100,12 @@ def encode_numeric_range(df, name, normalized_low=-1, normalized_high=1,
 
     df[name] = ((df[name] - data_low)/(data_high - data_low))*(normalized_high - normalized_low) + normalized_low
 
-
-# This function submits an assignment.  You can submit an assignment as much as you like, only the final
-# submission counts.  The paramaters are as follows:
-# data - Pandas dataframe output.
-# key - Your student key that was emailed to you.
-# no - The assignment class number, should be 1 through 1.
-# source_file - The full path to your Python or IPYNB file.  This must have "_class1" as part of its name.
-# .             The number must match your assignment number.  For example "_class2" for class assignment #2.
-def submit(data,key,no,source_file=None):
-    if source_file is None and '__file__' not in globals(): raise Exception('Must specify a filename when a Jupyter notebook.')
-    if source_file is None: source_file = __file__
-    suffix = '_class{}'.format(no)
-    if suffix not in source_file: raise Exception('{} must be part of the filename.'.format(suffix))
-    with open(source_file, "rb") as image_file:
-        encoded_python = base64.b64encode(image_file.read()).decode('ascii')
-    ext = os.path.splitext(source_file)[-1].lower()
-    if ext not in ['.ipynb','.py']: raise Exception("Source file is {} must be .py or .ipynb".format(ext))
-    r = requests.post("https://api.heatonresearch.com/assignment-submit",
-        headers={'x-api-key':key}, json={'csv':base64.b64encode(data.to_csv(index=False).encode('ascii')).decode("ascii"),
-        'assignment': no, 'ext':ext, 'py':encoded_python})
-    if r.status_code == 200:
-        print("Success: {}".format(r.text))
-    else: print("Failure: {}".format(r.text))
-
-
+# In[]:
 # # The KDD-99 Dataset
 #
-# The [KDD-99 dataset](http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html) is very famous in the security field and almost a "hello world" of intrusion detection systems in machine learning.
-#
-# # Read in Raw KDD-99 Dataset
-
-# In[2]:
-
+# The [KDD-99 dataset](http://kdd.ics.uci.edu/databases/kddcup99/kddcup99.html)
+# is very famous in the security field and almost a "hello world" of intrusion detection systems in machine learning.
+# Read in Raw KDD-99 Dataset
 
 from keras.utils.data_utils import get_file
 
@@ -214,13 +174,7 @@ df.columns = [
 # display 5 rows
 df[0:5]
 
-
-# # Analyzing a Dataset
-#
-# The following script can be used to give a high-level overview of how a dataset appears.
-
-# In[3]:
-
+# In[]:
 
 ENCODING = 'utf-8'
 
@@ -249,27 +203,13 @@ def analyze(filename):
             print("** {}:{}".format(col,expand_categories(df[col])))
             expand_categories(df[col])
 
-
-# In[4]:
-
+# In[]:
 
 # Analyze KDD-99
-
-import tensorflow.contrib.learn as skflow
-import pandas as pd
-import os
-import numpy as np
 from sklearn import metrics
 from scipy.stats import zscore
 
-
-# # Encode the feature vector
-# Encode every row in the database.  This is not instant!
-
-# In[5]:
-
 # Now encode the feature vector
-
 encode_numeric_zscore(df, 'duration')
 encode_text_dummy(df, 'protocol_type')
 encode_text_dummy(df, 'service')
@@ -315,27 +255,17 @@ outcomes = encode_text_index(df, 'outcome')
 num_classes = len(outcomes)
 
 # display 5 rows
-
 df.dropna(inplace=True,axis=1)
 df[0:5]
-# This is the numeric feature vector, as it goes to the neural net
+# This is the numeric feature vector
 
+# In[]:
 
-# # Train the Neural Network
-
-# In[6]:
-
-
-import pandas as pd
-import io
-import requests
-import numpy as np
-import os
-from sklearn.model_selection import train_test_split
-from sklearn import metrics
+# creating and training the model
 from keras.models import Sequential
-from keras.layers.core import Dense, Activation
 from keras.callbacks import EarlyStopping
+from keras.layers.core import Dense, Activation
+from sklearn.model_selection import train_test_split
 
 # Break into X (predictors) & y (prediction)
 x, y = to_xy(df,'outcome')
@@ -356,12 +286,11 @@ model.add(Dense(23, kernel_initializer='normal', activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam')
 
 monitor = EarlyStopping(monitor='val_loss', min_delta=1e-3, patience=5, verbose=1, mode='auto')
-model.fit(x_train,y_train,validation_data=(x_test,y_test),callbacks=[monitor],verbose=2,epochs=1000)
+model.fit(x_train,y_train,validation_data=(x_test,y_test),callbacks=[monitor],verbose=2,epochs=30)
 
 model.save("trained_model.hdf5")
 
-# In[7]:
-
+# In[]:
 
 # Measure accuracy
 pred = model.predict(x_test)
@@ -370,8 +299,7 @@ y_eval = np.argmax(y_test,axis=1)
 score = metrics.accuracy_score(y_eval, pred)
 print("Validation score: {}".format(score))
 
-
-# In[ ]:
+# In[]:
 
 # Inference on Test Case
 test_case = x_test[7]
@@ -381,3 +309,4 @@ pred = model.predict(test_case)
 pred = np.argmax(pred, axis=1)
 
 print("Outcome Prediction : {}".format(outcomes[pred]))
+
