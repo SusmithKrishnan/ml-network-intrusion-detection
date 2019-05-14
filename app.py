@@ -72,8 +72,12 @@ encode_numeric_zscore(df, 'dst_host_rerror_rate')
 encode_numeric_zscore(df, 'dst_host_srv_rerror_rate')
 outcomes = encode_text_index(df, 'outcome')
 num_classes = len(outcomes)
-
 df.dropna(inplace=True,axis=1)
+
+cDOS = [0,6,18,14,9,20]
+cProbe = [5,15,10,17]
+cU2R = [7,16,12,1]
+cR2L = [3,8,2,19,13,4,21,22]
 
 x, y = to_xy(df,'outcome')
 print("loading model...")
@@ -87,6 +91,20 @@ for i in r:
     pred = model.predict(test_case)
     pred = np.argmax(pred, axis=1)
     c=bcolors.GREEN
-    if pred != 11:
+
+    if int(pred) != 11:
         c=bcolors.RED
-    print(bcolors.WHITE+bcolors.BOLD+"\nTest case {} Input data >>".format(i)+bcolors.R+c+"\n{}\n{} ".format(rawcs.iloc[[i]],test_case)+bcolors.WHITE+"\nAttack type :"+bcolors.BOLD+c+" {}\n".format(outcomes[pred])+bcolors.R)
+
+        pred = int(pred)
+        if pred in cDOS:
+            attackClass = "Dos"
+        if pred in cProbe:
+            attackClass = "Probes"
+        if pred in cU2R:
+            attackClass = "U2R"
+        if pred in cR2L:
+            attackClass = "R2L"
+    else:
+        attackClass = "normal"
+
+    print(bcolors.WHITE+bcolors.BOLD+"\nTest case {} Input data >>".format(i)+bcolors.R+c+"\n{}\n{} ".format(rawcs.iloc[[i]],test_case)+bcolors.WHITE+"\nAttack type :"+bcolors.BOLD+c+" {}".format(outcomes[pred])+" attack Class: "+attackClass+"\n"+bcolors.R)
